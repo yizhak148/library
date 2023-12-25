@@ -1,15 +1,16 @@
-import { getBooks } from "./books.js"
+import { getBooks } from "./books.js";
 
-console.log("hello world", getBooks.length);
-
-const bla = document.getElementById("ul");
+const bookList = document.getElementById("book-list");
 
 async function app() {
-    if(!bla) {
-   throw new Error("page book not fuond")
-}
-    const book = await getBooks();
-    bla.innerHTML = book.map(book => { `<li> ${book.title} - ${book.author} </li>`}).join('');
+    if (!bookList) {
+        throw new Error("Book list element not in page");
+    }
+
+    const books = await getBooks();
+
+    bookList.innerHTML = books.map((book) => `<li><a href="/book-details.html#${book.id}">${book.title} - ${book.author}</a></li>`).join("\n");
 }
 
 app();
+//לעשות את הקטע שהספר זה קישורים ואם לוחצים עליהם זה מפנה לעמוד עם הפרטים
