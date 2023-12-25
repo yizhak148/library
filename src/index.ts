@@ -1,10 +1,14 @@
 import { createServer } from "http";
 import express from "express";
+import books from "./books.json"
 
 const app = express();
 
-app.get("/api/hello", (req, res) => {
-    res.send("world");
+app.get("/api/book", (_, res) => {
+  res.send(books.map((author , title) => ({ author ,title})))
+});
+app.post("/api/book/:id", async (_, res) => {
+//uptade
 });
 
 app.use(express.static("public"));

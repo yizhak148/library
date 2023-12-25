@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "./",
     "lib": ["ESNext", "DOM"],
+    "module": "NodeNext",
     "types": [],
-    "sourceMap": true
+    "sourceMap": true,
+    "resolveJsonModule": true
   }
 }
