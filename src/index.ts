@@ -7,8 +7,16 @@ const app = express();
 app.get("/api/book", (_, res) => {
   res.send(books.map((author , title) => ({ author ,title})))
 });
-app.post("/api/book/:id", async (_, res) => {
-//uptade
+
+app.post("/api/book/:id", (req, res) => {
+    const bookid = req.params.id
+
+    const book = books.find((b) => {b.id === bookid})
+
+    if(!book) {
+        res.status(404)
+        res.send(`can not fuond book with this id: ${bookid}`)
+    }
 });
 
 app.use(express.static("public"));
