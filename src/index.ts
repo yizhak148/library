@@ -27,7 +27,7 @@
 // server.listen(port, () => console.log(`Listening on port ${port}`));
 import { createServer } from "http";
 import { appendFile, readFile, writeFile } from "fs/promises";
-import express from "express";
+import express, { RequestHandler } from "express";
 import path from "path";
 import { randomUUID } from "crypto";
 import { json } from "body-parser";
@@ -45,6 +45,16 @@ app.use((req, res, next) => {
 
 app.use("/api/books", bookRouter);
 app.use("/api/copies", copiesRouter)
+
+// app.use((err, req, res, next) => {
+//     if (res.headersSent) {
+//         next(err);
+//     }
+
+//     console.error(err);
+//     res.status(500);
+//     res.send("Something went wrong");
+// });
 
 app.use(express.static("public"));
 
