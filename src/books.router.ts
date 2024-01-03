@@ -19,3 +19,15 @@ router.get("/:bookId", (req, res) => {
 
     res.send(book);
 });
+
+
+router.get("/:booktitle", (req, res) => {
+    const bookTitle = req.params.booktitle;
+    const foundBook = books.find((book) => book.title === bookTitle);
+
+    if (foundBook) {
+        res.json(foundBook);
+    } else {
+        res.status(404).json({ error: "Book not found" });
+    }
+});
