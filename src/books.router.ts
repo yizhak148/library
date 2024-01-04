@@ -1,33 +1,42 @@
 import { Router } from "express";
-
-import books from "./books.json";
+import { router as bookCopiesRouter } from "./book-copies.router";
+import { Book } from "./books.model";
 
 export const router = Router();
 
-router.get("/", (req, res) => {
-    res.send(books.map(({ id, author, title }) => ({ id, author, title })));
+router.param("bookId", async (req, res, next, bookId) => {
+    try {
+        req.book = await Book.findById(bookId).populate("copies.member");
+
+        if (!req.book) {
+            res.status(404);
+            res.send(`Book with id ${bookId} not found.`);
+            return;
+        }
+
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get("/", async (req, res, next) => {
+    try {
+        const search = req.query.search?.toString() ?? ".*";
+        const searchPattern = new RegExp(search, "i");
+        const books = await Book.find(
+            { $or: [{ title: searchPattern }, { author: searchPattern }] },
+            { title: true, author: true }
+        );
+
+        res.send(books);
+    } catch (err) {
+        next(err);
+    }
 });
 
 router.get("/:bookId", (req, res) => {
-    const book = books.find((b) => b.id === req.params.bookId);
-
-    if (!book) {
-        res.status(404);
-        res.send(`Book with id ${req.params.bookId} not found.`);
-        return;
-    }
-
-    res.send(book);
+    res.send(req.book);
 });
 
-
-router.get("/:booktitle", (req, res) => {
-    const bookTitle = req.params.booktitle;
-    const foundBook = books.find((book) => book.title === bookTitle);
-
-    if (foundBook) {
-        res.json(foundBook);
-    } else {
-        res.status(404).json({ error: "Book not found" });
-    }
-});
+router.use("/:bookId/copies", bookCopiesRouter);

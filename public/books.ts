@@ -1,4 +1,9 @@
-type Book = {
+export type Member = {
+  _id: string,
+  name: string
+};
+
+export type Book = {
   _id: string,
   author: string,
   country: string,
@@ -7,29 +12,26 @@ type Book = {
   link: string,
   pages: number,
   title: string,
-  year: number
+  year: number,
+  copies: Copy[]
 };
 
 export type Copy = {
-  id: string,
-  bookId: string,
-  member?: string
+  _id: string,
+  member?: Member
 };
 
-export async function getBooks(): Promise<Pick<Book, "_id" | "title" | "author">[]> {
-  const res = await fetch("/api/books");
+export type BookListResult = Pick<Book, "_id" | "title" | "author">[];
+
+export async function getBooks(search?: string): Promise<BookListResult> {
+  const query = search ? `?search=${search}` : "";
+  const res = await fetch(`/api/books${query}`);
 
   return res.json();
 }
 
 export async function getBookDetails(bookId: string): Promise<Book> {
   const res = await fetch(`/api/books/${bookId}`);
-
-  return res.json();
-}
-
-export async function getCopies(bookId: string): Promise<Copy[]> {
-  const res = await fetch(`/api/books/${bookId}/copies`);
 
   return res.json();
 }
@@ -51,4 +53,8 @@ export async function borrowCopy(copyId: string, member: string) {
       "Content-Length": body.length.toString()
     }
   });
+}
+
+export function getMembers(): Promise<Member[]> {
+  return fetch("/api/members").then((res) => res.json());
 }

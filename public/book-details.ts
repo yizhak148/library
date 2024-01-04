@@ -1,10 +1,10 @@
-import { Copy, borrowCopy, createCopy, getBookDetails, getCopies } from "./books.js";
+import { Book, Member, borrowCopy, createCopy, getBookDetails, getMembers } from "./books.js";
 
 async function app() {
     const bookId = window.location.hash.slice(1);
-    const [bookDetails, copies] = await Promise.all([
+    const [bookDetails, members] = await Promise.all([
         getBookDetails(bookId),
-        getCopies(bookId)
+        getMembers()
     ]);
 
     const coverImage = document.getElementById("book-cover");
@@ -16,19 +16,8 @@ async function app() {
     renderBookField("year");
     renderBookField("pages");
 
-    renderCopies(copies);
-
-    const createCopyButton = document.getElementById("create-copy");
-
-    if (!createCopyButton) {
-        throw new Error();
-    }
-
-    createCopyButton.addEventListener("click", async () => {
-        await createCopy(bookId);
-
-        renderCopies(await getCopies(bookId));
-    });
+    renderCopies(bookDetails, members);
+    bindCreateCopyButton(bookId);
 
     function renderBookField(field: keyof typeof bookDetails) {
         const authorSpan = document.getElementById(`book-${field}`);
@@ -43,7 +32,26 @@ async function app() {
 
 app();
 
-function renderCopies(copies: Copy[]) {
+function bindCreateCopyButton(bookId: string) {
+    const createCopyButton = document.getElementById("create-copy");
+
+    if (!createCopyButton) {
+        throw new Error();
+    }
+
+    createCopyButton.addEventListener("click", async () => {
+        await createCopy(bookId);
+
+        const [book, members] = await Promise.all([
+            getBookDetails(bookId),
+            getMembers()
+        ]);
+
+        renderCopies(book, members);
+    });
+}
+
+function renderCopies({ _id, copies }: Book, members: Member[]) {
     const copyCount = document.getElementById("copy-count");
 
     if (!copyCount) {
@@ -59,17 +67,17 @@ function renderCopies(copies: Copy[]) {
     }
 
     copiesTable.innerHTML = copies
-        .map((copy) => `<tr><td>${copy.id}</td><td>${copy.member ? "🔴" : "🟢"}</td><td>${
-            copy.member ??
+        .map((copy) => `<tr><td>${copy._id}</td><td>${copy.member ? "🔴" : "🟢"}</td><td>${copy.member?.name ??
             `<form class="borrow-form">
-                <input type="hidden" name="bookId" value="${copy.bookId}" />
-                <input type="hidden" name="copyId" value="${copy.id}" />
-                <input name="member" list="member" />
+                <input type="hidden" name="copyId" value="${copy._id}" />
+                <select name="member">
+                    ${members.map((m) => `<option value="${m._id}">${m.name}</option>`).join("\n")}
+                </select>
                 <button>Borrow</button>
             </form>`
-        }</td></tr>`)
+            }</td></tr>`)
         .join("\n");
-    
+
     document.querySelectorAll(".borrow-form").forEach((form) => form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -77,6 +85,11 @@ function renderCopies(copies: Copy[]) {
 
         await borrowCopy(formData.get("copyId")!.toString(), formData.get("member")!.toString());
 
-        renderCopies(await getCopies(formData.get("bookId")!.toString()));
+        const [book, members] = await Promise.all([
+            getBookDetails(_id),
+            getMembers()
+        ]);
+
+        renderCopies(book, members);
     }));
 }

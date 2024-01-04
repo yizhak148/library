@@ -60,7 +60,7 @@ async function startServer() {
     }
 
     await mongoose.connect(process.env.CONN_STRING, {
-        dbName: "library"
+        dbName: "myLibrary"
     });
 
     server.listen(port, () => console.log(`Listening on port ${port}`));
