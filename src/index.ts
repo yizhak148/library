@@ -8,6 +8,7 @@ import { randomUUID } from "crypto";
 import { json } from "body-parser";
 import { router as bookRouter} from "./books.router";
 import { router  as copiesRouter} from "./copis.router";
+import {router as registerRouter } from "./register.router";
 import mongoose from "mongoose";
 
 const app = express();
@@ -20,7 +21,8 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/books", bookRouter);
-app.use("/api/copies", copiesRouter)
+app.use("/api/copies", copiesRouter);
+app.use("/register", registerRouter);
 
 // app.use((err, req, res, next) => {
 //     if (res.headersSent) {
